@@ -35,7 +35,7 @@ public class Main {
             }
 
             if (input.startsWith(FULLREAD)) {
-                handleFullRead(); // fullread 작업 수행 메서드
+                handleFullRead(100); // fullread 작업 수행 메서드
             }
 
             if (input.startsWith(TESTAPP1)) {
@@ -47,30 +47,34 @@ public class Main {
             }
 
             if (input.startsWith(READ)) {
-                System.out.println("READ 작업 시작");
-                StringTokenizer st = new StringTokenizer(input, " ");
-                st.nextToken();  // "read" 토큰 넘기기
-
-                if (!st.hasMoreTokens()) {
-                    System.out.println("LBA 번호를 입력해주세요.");
-                    continue;
-                }
-
-                int lba = Integer.parseInt(st.nextToken());
-
-                // ssd.jar에 LBA 읽기 명령 전달
-                String command = String.format("java -jar ssd.jar R %d", lba);
-                executeCommand(command);
-
-                // result.txt에서 결과 읽기
-                String result = readFromFile("result.txt");
-
-                // 결과 출력
-                System.out.println("LBA " + lba + "번에서 읽은 값: " + result);
-
-                System.out.println("READ 작업 완료");
+                handleRead(input);  // read 작업 수행 메서드
             }
         }
+    }
+
+    // read 작업 수행
+    private static void handleRead(String input) throws IOException, InterruptedException {
+        System.out.println("READ 작업 시작");
+        StringTokenizer st = new StringTokenizer(input, " ");
+        st.nextToken();  // "read" 토큰 넘기기
+
+        if (!st.hasMoreTokens()) {
+            System.out.println("LBA 번호를 입력해주세요.");
+            return;
+        }
+
+        int lba = Integer.parseInt(st.nextToken());
+
+        // ssd.jar에 LBA 읽기 명령 전달
+        String command = String.format("java -jar ssd.jar R %d", lba);
+        executeCommand(command);
+
+        // result.txt에서 결과 읽기
+        String result = readFromFile("result.txt");
+
+        // 결과 출력
+        System.out.println("LBA " + lba + "번에서 읽은 값: " + result);
+        System.out.println("READ 작업 완료");
     }
 
     // fullwrite 작업 수행
@@ -85,70 +89,41 @@ public class Main {
         }
 
         String value = st.nextToken();
-
-        for (int i = 0; i < 100; i++) {
-            String command = String.format("java -jar ssd.jar W %d %s", i, value);
-            executeCommand(command);
-        }
+        executeWriteOperations(100, value);
         System.out.println("FULL WRITE 작업 완료");
     }
 
-    // fullread 작업 수행
-    private static void handleFullRead() throws IOException, InterruptedException {
+    // fullread 작업 수행 (기본적으로 100개의 라인 읽기)
+    private static void handleFullRead(int count) throws IOException, InterruptedException {
         System.out.println("FULL READ 작업 시작");
-        ArrayList<String> arr = new ArrayList<>();
-
-        for (int i = 0; i < 100; i++) {
-            String command = String.format("java -jar ssd.jar R %d", i);
-            executeCommand(command);
-
-            arr.add(readFromFile("result.txt"));
-        }
+        ArrayList<String> arr = executeReadOperations(count);
 
         // 읽은 값 출력
         for (String value : arr) {
             System.out.println(value);
         }
-
         System.out.println("FULL READ 작업 완료");
     }
 
     // testapp1 작업 수행: fullwrite -> fullread 순차 수행
     private static void handleTestApp1() throws IOException, InterruptedException {
         System.out.println("fullwrite 0x00000000 수행");
-        for (int i = 0; i < 100; i++) {
-            String command = String.format("java -jar ssd.jar W %d %s", i, "0x00000000");
-            executeCommand(command);
-        }
+        executeWriteOperations(100, "0x00000000");
         System.out.println("fullwrite 완료");
 
-        handleFullRead();  // fullread 실행 (중복된 코드 제거)
+        handleFullRead(100);  // fullread 실행
     }
 
     // testapp2 작업 수행: 특정 패턴으로 쓰기, 읽기 실행
     private static void handleTestApp2() throws IOException, InterruptedException {
         System.out.println("0 ~ 5 번 LBA 에 0xAAAABBBB 값으로 총 30번 Write를 수행");
-        for (int i = 0; i <= 5; i++) {
-            for (int j = 0; j < 30; j++) {
-                String command = String.format("java -jar ssd.jar W %d 0xAAAABBBB", i);
-                executeCommand(command);
-            }
-        }
+        executeWriteOperations(6, "0xAAAABBBB", 30);
 
         System.out.println("0 ~ 5 번 LBA 에 0x12345678 값으로 1 회 Over Write를 수행");
-        for (int i = 0; i <= 5; i++) {
-            String command = String.format("java -jar ssd.jar W %d 0x12345678", i);
-            executeCommand(command);
-        }
+        executeWriteOperations(6, "0x12345678");
 
         System.out.println("0 ~ 5 번 LBA Read 했을 때 정상적으로 출력 확인");
-        ArrayList<String> arr = new ArrayList<>();
-        for (int i = 0; i <= 5; i++) {
-            String command = String.format("java -jar ssd.jar R %d", i);
-            executeCommand(command);
-
-            arr.add(readFromFile("result.txt"));
-        }
+        ArrayList<String> arr = executeReadOperations(6);
 
         // 읽은 값 출력
         for (String value : arr) {
@@ -156,9 +131,36 @@ public class Main {
         }
     }
 
+    // 반복적인 write 작업을 처리하는 메서드 (overload)
+    private static void executeWriteOperations(int count, String value) throws IOException, InterruptedException {
+        executeWriteOperations(count, value, 1);  // 기본 1회 실행
+    }
+
+    // write 작업을 처리하는 메서드
+    private static void executeWriteOperations(int count, String value, int repeat) throws IOException, InterruptedException {
+        for (int i = 0; i < count; i++) {
+            for (int j = 0; j < repeat; j++) {
+                String command = String.format("java -jar ssd.jar W %d %s", i, value);
+                executeCommand(command);
+            }
+        }
+    }
+
+    // 반복적인 read 작업을 처리하는 메서드
+    private static ArrayList<String> executeReadOperations(int count) throws IOException, InterruptedException {
+        ArrayList<String> arr = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            String command = String.format("java -jar ssd.jar R %d", i);
+            executeCommand(command);
+            arr.add(readFromFile("result.txt"));
+        }
+        return arr;
+    }
+
     // 도움말 출력
     private static void printHelp() {
         System.out.println("사용 가능한 명령어:");
+        System.out.println("  read <value> : value의 값을 읽기");
         System.out.println("  fullwrite <value> : 100개의 값을 쓰기");
         System.out.println("  fullread : 100개의 값을 읽기");
         System.out.println("  exit : 프로그램 종료");
