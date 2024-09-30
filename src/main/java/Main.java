@@ -11,6 +11,7 @@ public class Main {
     private static final String HELP = "help";
     private static final String TESTAPP1 = "testapp1";
     private static final String TESTAPP2 = "testapp2";
+    private static final String READ = "read";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Scanner scanner = new Scanner(System.in);
@@ -43,6 +44,31 @@ public class Main {
 
             if (input.startsWith(TESTAPP2)) {
                 handleTestApp2(); // testapp2 작업 수행 메서드
+            }
+
+            if (input.startsWith(READ)) {
+                System.out.println("READ 작업 시작");
+                StringTokenizer st = new StringTokenizer(input, " ");
+                st.nextToken();  // "read" 토큰 넘기기
+
+                if (!st.hasMoreTokens()) {
+                    System.out.println("LBA 번호를 입력해주세요.");
+                    continue;
+                }
+
+                int lba = Integer.parseInt(st.nextToken());
+
+                // ssd.jar에 LBA 읽기 명령 전달
+                String command = String.format("java -jar ssd.jar R %d", lba);
+                executeCommand(command);
+
+                // result.txt에서 결과 읽기
+                String result = readFromFile("result.txt");
+
+                // 결과 출력
+                System.out.println("LBA " + lba + "번에서 읽은 값: " + result);
+
+                System.out.println("READ 작업 완료");
             }
         }
     }
