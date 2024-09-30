@@ -61,8 +61,8 @@ result.txt 에 읽은 값이 적힌다.
 5. `read 3`명령어를 통해 바뀐 3번 LBA를 읽는다. (nand.txt, result.txt)
 6. `fullread` 명령어를 통해 모든 LAB의 값들을 화면에 출력한다. (nand.txt, result.txt)
 7. `testapp1` 명령어를 통해 fullwriteㅇ와 fullread가 정상 동작하는지 확인한다.
-8. `testapp2` 명령어를 통해 write와 read가 정상 동작하는지 확인한다.
-  • 0 ~ 5 번 LBA 에 0xAAAABBBB 값으로 총 30번 Write를 수행한다.
-  • 0 ~ 5 번 LBA 에 0x12345678 값으로 1 회 Over Write를 수행한다.
-  • 0 ~ 5 번 LBA Read 했을 때 정상적으로 값이 읽히는지 확인한다.
+8. `testapp2` 명령어를 통해 write와 read가 정상 동작하는지 확인한다.  
+  • 0 ~ 5 번 LBA 에 0xAAAABBBB 값으로 총 30번 Write를 수행한다.  
+  • 0 ~ 5 번 LBA 에 0x12345678 값으로 1 회 Over Write를 수행한다.  
+  • 0 ~ 5 번 LBA Read 했을 때 정상적으로 값이 읽히는지 확인한다.  
 
