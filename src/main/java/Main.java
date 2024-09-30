@@ -9,8 +9,8 @@ public class Main {
     private static final String FULLREAD = "fullread";
     private static final String EXIT = "exit";
     private static final String HELP = "help";
-    private static final String WRITE = "write";
     private static final String READ = "read";
+    private static final String WRITE = "write";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Scanner scanner = new Scanner(System.in);
@@ -74,9 +74,40 @@ public class Main {
             if (input.startsWith(WRITE)) {
                 System.out.println("WRITE 작업 시작");
                 String[] wordsArray = input.split(" ");
+
+                if (wordsArray.length != 3) {
+                    System.out.println("입력 형식이 잘못되었습니다.");
+                    continue;
+                }
+
                 String command = String.format("java -jar ssd.jar W %s %s", wordsArray[1], wordsArray[2]);
                 executeCommand(command);
                 System.out.println("WRITE 작업 완료");
+            }
+
+            if (input.startsWith(READ)) {
+                System.out.println("READ 작업 시작");
+                StringTokenizer st = new StringTokenizer(input, " ");
+                st.nextToken();  // "read" 토큰 넘기기
+
+                if (!st.hasMoreTokens()) {
+                    System.out.println("LBA 번호를 입력해주세요.");
+                    continue;
+                }
+
+                int lba = Integer.parseInt(st.nextToken());
+
+                // ssd.jar에 LBA 읽기 명령 전달
+                String command = String.format("java -jar ssd.jar R %d", lba);
+                executeCommand(command);
+
+                // result.txt에서 결과 읽기
+                String result = readFromFile("result.txt");
+
+                // 결과 출력
+                System.out.println("LBA " + lba + "번에서 읽은 값: " + result);
+
+                System.out.println("READ 작업 완료");
             }
         }
     }
