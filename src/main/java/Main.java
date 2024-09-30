@@ -9,6 +9,8 @@ public class Main {
     private static final String FULLREAD = "fullread";
     private static final String EXIT = "exit";
     private static final String HELP = "help";
+    private static final String WRITE = "write";
+    private static final String READ = "read";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Scanner scanner = new Scanner(System.in);
@@ -67,6 +69,14 @@ public class Main {
                 }
 
                 System.out.println("FULL READ 작업 완료");
+            }
+
+            if (input.startsWith(WRITE)) {
+                System.out.println("WRITE 작업 시작");
+                String[] wordsArray = input.split(" ");
+                String command = String.format("java -jar ssd.jar W %s %s", wordsArray[1], wordsArray[2]);
+                executeCommand(command);
+                System.out.println("WRITE 작업 완료");
             }
         }
     }
