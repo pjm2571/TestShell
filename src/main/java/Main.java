@@ -9,12 +9,14 @@ public class Main {
     private static final String FULLREAD = "fullread";
     private static final String EXIT = "exit";
     private static final String HELP = "help";
+    private static final String TESTAPP1 = "testapp1";
+    private static final String TESTAPP2 = "testapp2";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.print("입력 > ");  // 프롬프트
+            System.out.print("입력 > ");  // 사용자로부터 입력을 받기 위한 프롬프트
             String input = scanner.nextLine();
 
             if (input.startsWith(EXIT)) {
@@ -23,52 +25,119 @@ public class Main {
             }
 
             if (input.startsWith(HELP)) {
-                System.out.println("사용 가능한 명령어:");
-                System.out.println("  fullwrite <value> : 100개의 값을 쓰기");
-                System.out.println("  fullread : 100개의 값을 읽기");
-                System.out.println("  exit : 프로그램 종료");
+                printHelp(); // 도움말 출력 메서드
                 continue;
             }
 
             if (input.startsWith(FULLWRITE)) {
-                System.out.println("FULL WRITE 작업 시작");
-                StringTokenizer st = new StringTokenizer(input, " ");
-                st.nextToken();  // "fullwrite" 토큰 넘기기
-
-                if (!st.hasMoreTokens()) {
-                    System.out.println("값을 입력해주세요.");
-                    continue;
-                }
-
-                String value = st.nextToken();
-
-                for (int i = 0; i < 100; i++) {
-                    String command = String.format("java -jar ssd.jar W %d %s", i, value);
-                    executeCommand(command);
-                }
-                System.out.println("FULL WRITE 작업 완료");
+                handleFullWrite(input); // fullwrite 작업 수행 메서드
             }
 
             if (input.startsWith(FULLREAD)) {
-                System.out.println("FULL READ 작업 시작");
-                ArrayList<String> arr = new ArrayList<>();
+                handleFullRead(); // fullread 작업 수행 메서드
+            }
 
-                for (int i = 0; i < 100; i++) {
-                    String command = String.format("java -jar ssd.jar R %d", i);
-                    executeCommand(command);  // 파일에 쓰이는 명령어 실행
+            if (input.startsWith(TESTAPP1)) {
+                handleTestApp1(); // testapp1 작업 수행 메서드
+            }
 
-                    // 결과 파일에서 읽은 값을 ArrayList에 추가
-                    arr.add(readFromFile("result.txt"));
-                }
-
-                // 읽은 값 출력
-                for (String value : arr) {
-                    System.out.println(value);
-                }
-
-                System.out.println("FULL READ 작업 완료");
+            if (input.startsWith(TESTAPP2)) {
+                handleTestApp2(); // testapp2 작업 수행 메서드
             }
         }
+    }
+
+    // fullwrite 작업 수행
+    private static void handleFullWrite(String input) throws IOException, InterruptedException {
+        System.out.println("FULL WRITE 작업 시작");
+        StringTokenizer st = new StringTokenizer(input, " ");
+        st.nextToken();  // "fullwrite" 토큰 넘기기
+
+        if (!st.hasMoreTokens()) {
+            System.out.println("값을 입력해주세요.");
+            return;
+        }
+
+        String value = st.nextToken();
+
+        for (int i = 0; i < 100; i++) {
+            String command = String.format("java -jar ssd.jar W %d %s", i, value);
+            executeCommand(command);
+        }
+        System.out.println("FULL WRITE 작업 완료");
+    }
+
+    // fullread 작업 수행
+    private static void handleFullRead() throws IOException, InterruptedException {
+        System.out.println("FULL READ 작업 시작");
+        ArrayList<String> arr = new ArrayList<>();
+
+        for (int i = 0; i < 100; i++) {
+            String command = String.format("java -jar ssd.jar R %d", i);
+            executeCommand(command);
+
+            arr.add(readFromFile("result.txt"));
+        }
+
+        // 읽은 값 출력
+        for (String value : arr) {
+            System.out.println(value);
+        }
+
+        System.out.println("FULL READ 작업 완료");
+    }
+
+    // testapp1 작업 수행: fullwrite -> fullread 순차 수행
+    private static void handleTestApp1() throws IOException, InterruptedException {
+        System.out.println("fullwrite 0x00000000 수행");
+        for (int i = 0; i < 100; i++) {
+            String command = String.format("java -jar ssd.jar W %d %s", i, "0x00000000");
+            executeCommand(command);
+        }
+        System.out.println("fullwrite 완료");
+
+        handleFullRead();  // fullread 실행 (중복된 코드 제거)
+    }
+
+    // testapp2 작업 수행: 특정 패턴으로 쓰기, 읽기 실행
+    private static void handleTestApp2() throws IOException, InterruptedException {
+        System.out.println("0 ~ 5 번 LBA 에 0xAAAABBBB 값으로 총 30번 Write를 수행");
+        for (int i = 0; i <= 5; i++) {
+            for (int j = 0; j < 30; j++) {
+                String command = String.format("java -jar ssd.jar W %d 0xAAAABBBB", i);
+                executeCommand(command);
+            }
+        }
+
+        System.out.println("0 ~ 5 번 LBA 에 0x12345678 값으로 1 회 Over Write를 수행");
+        for (int i = 0; i <= 5; i++) {
+            String command = String.format("java -jar ssd.jar W %d 0x12345678", i);
+            executeCommand(command);
+        }
+
+        System.out.println("0 ~ 5 번 LBA Read 했을 때 정상적으로 출력 확인");
+        ArrayList<String> arr = new ArrayList<>();
+        for (int i = 0; i <= 5; i++) {
+            String command = String.format("java -jar ssd.jar R %d", i);
+            executeCommand(command);
+
+            arr.add(readFromFile("result.txt"));
+        }
+
+        // 읽은 값 출력
+        for (String value : arr) {
+            System.out.println(value);
+        }
+    }
+
+    // 도움말 출력
+    private static void printHelp() {
+        System.out.println("사용 가능한 명령어:");
+        System.out.println("  fullwrite <value> : 100개의 값을 쓰기");
+        System.out.println("  fullread : 100개의 값을 읽기");
+        System.out.println("  exit : 프로그램 종료");
+        System.out.println("  testapp1 : fullwrite 수행 후, fullread");
+        System.out.println("  testapp2 : testapp2 수행");
     }
 
     // 외부 명령어를 실행하는 메서드
