@@ -24,39 +24,23 @@ public class Main {
             if (input.startsWith(EXIT)) {
                 System.out.println("프로그램 종료");
                 break;
-            }
-
-            if (input.startsWith(HELP)) {
+            } else if (input.startsWith(HELP)) {
                 printHelp();
-                continue;
-            }
-
-            if (input.startsWith(FULLWRITE)) {
+            } else if (input.startsWith(FULLWRITE)) {
                 handleFullWrite(input);
-            }
-
-            if (input.startsWith(FULLREAD)) {
+            } else if (input.startsWith(FULLREAD)) {
                 handleFullRead(100);
-            }
-
-            if (input.startsWith(TESTAPP1)) {
+            } else if (input.startsWith(TESTAPP1)) {
                 handleTestApp1();
-            }
-
-            if (input.startsWith(TESTAPP2)) {
+            } else if (input.startsWith(TESTAPP2)) {
                 handleTestApp2();
-            }
-
-            if (input.startsWith(WRITE)) {
+            } else if (input.startsWith(WRITE)) {
                 handleWrite(input);
-            }
-
-            if (input.startsWith(READ)) {
+            } else if (input.startsWith(READ)) {
                 handleRead(input);
+            } else {
+                System.out.println("[ERROR] INVALID COMMAND");
             }
-
-            // 에러처리
-            System.out.println("[ERROR] INVALID COMMAND");
         }
     }
 
@@ -146,12 +130,14 @@ public class Main {
     }
 
     // 반복적인 WRITE 작업을 처리하는 메서드 (Overload)
-    private static void executeWriteOperations(int count, String value) throws IOException, InterruptedException {
+    private static void executeWriteOperations(int count, String value)
+            throws IOException, InterruptedException {
         executeWriteOperations(count, value, 1);
     }
 
     // WRITE 작업을 처리하는 메서드
-    private static void executeWriteOperations(int count, String value, int repeat) throws IOException, InterruptedException {
+    private static void executeWriteOperations(int count, String value, int repeat)
+            throws IOException, InterruptedException {
         for (int i = 0; i < count; i++) {
             for (int j = 0; j < repeat; j++) {
                 String command = String.format("java -jar ssd.jar W %d %s", i, value);
@@ -161,7 +147,8 @@ public class Main {
     }
 
     // 반복적인 READ 작업을 처리하는 메서드
-    private static ArrayList<String> executeReadOperations(int count) throws IOException, InterruptedException {
+    private static ArrayList<String> executeReadOperations(int count)
+            throws IOException, InterruptedException {
         ArrayList<String> arr = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             String command = String.format("java -jar ssd.jar R %d", i);
@@ -191,7 +178,8 @@ public class Main {
         Process process = processBuilder.start();
         StringBuilder result = new StringBuilder();
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 result.append(line).append("\n");
