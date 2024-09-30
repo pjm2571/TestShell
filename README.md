@@ -1,7 +1,7 @@
 # 📌 프로젝트 소개
 가상 SSD를 제작하고, SSD 제품을 테스트 할 수 있는 Test Shell을 제작한다.
 - [SSD 레포지토리](https://github.com/jinii9/ssd-project)
-- [TestShell 레포지토리](https://github.com/jinii9/ssd-project)
+- [TestShell 레포지토리](https://github.com/pjm2571/TestShell)
 
 ## 1️⃣ 가상 SSD 프로그램
 - Read 명령어와 Write 명령어만 존재
