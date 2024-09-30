@@ -12,6 +12,7 @@ public class Main {
     private static final String TESTAPP1 = "testapp1";
     private static final String TESTAPP2 = "testapp2";
     private static final String READ = "read";
+    private static final String WRITE = "write";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Scanner scanner = new Scanner(System.in);
@@ -44,6 +45,20 @@ public class Main {
 
             if (input.startsWith(TESTAPP2)) {
                 handleTestApp2(); // testapp2 작업 수행 메서드
+            }
+
+            if (input.startsWith(WRITE)) {
+                System.out.println("WRITE 작업 시작");
+                String[] wordsArray = input.split(" ");
+
+                if (wordsArray.length != 3) {
+                    System.out.println("입력 형식이 잘못되었습니다.");
+                    continue;
+                }
+
+                String command = String.format("java -jar ssd.jar W %s %s", wordsArray[1], wordsArray[2]);
+                executeCommand(command);
+                System.out.println("WRITE 작업 완료");
             }
 
             if (input.startsWith(READ)) {
